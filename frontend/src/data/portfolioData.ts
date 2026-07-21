@@ -72,7 +72,7 @@ export const portfolioProjects: Project[] = [
     description: 'A full-stack personal portfolio platform with a public portfolio website and a secure admin dashboard for managing contact enquiries and authentication.',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
     liveUrl: '/',
-    githubUrl: 'https://github.com/christpherit',
+    githubUrl: 'https://github.com/christpherit/felix-portfolio',
     techStack: ['React', 'Node.js', 'Express', 'MongoDB', 'JWT', 'Tailwind CSS'],
     category: 'MERN',
     featured: true,

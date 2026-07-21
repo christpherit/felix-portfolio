@@ -1,6 +1,8 @@
 import Contact from '../models/Contact.js';
 import nodemailer from 'nodemailer';
 import { contactAutoReplyTemplate } from '../templates/contactAutoReplyTemplate.js';
+import { contactNotificationTemplate } from '../templates/contactNotificationMailTemplate.js';
+
 
 // @desc    Submit contact message (and dispatch notification)
 // @route   POST /api/contacts
@@ -41,22 +43,15 @@ export const createContact = async (req, res) => {
 
     // Notification email (to you)
     const notificationMail = {
-      from: `"Portfolio Contact Form" <${process.env.EMAIL_USER}>`,
-      to: process.env.NOTIFICATION_EMAIL || 'felixittech@gmail.com',
-      subject: `[Portfolio Inbox] ${subject}`,
-      html: `
-        <h2>📩 New Portfolio Contact</h2>
-
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-
-        <hr>
-
-        <p><strong>Message:</strong></p>
-
-        <p>${message}</p>
-      `,
+      from: `"Christopher Felix" <${process.env.EMAIL_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL || process.env.EMAIL_USER,
+      subject: `📩 New Portfolio Contact - ${subject}`,
+      html: contactNotificationTemplate({
+        name,
+        email,
+        subject,
+        message,
+      }),
     };
 
     // Auto reply email (to sender)

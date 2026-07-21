@@ -30,8 +30,8 @@ export const Experience: React.FC = () => {
               className="relative grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-12 mb-16 last:mb-0 items-start"
             >
               {/* Date/Duration column */}
-              <div className="col-span-1 sm:col-span-3 text-left sm:text-right pt-1.5 pl-10 sm:pl-0">
-                <span className="text-xs sm:text-sm font-black text-[#0B2545] font-mono tracking-wider">
+              <div className="col-span-1 sm:col-span-3 text-left sm:text-right lg:pt-2.5 pt-1.5 pl-10 sm:pl-0">
+                <span className="text-xs sm:text-sm font-black text-[#0B2545] font-mono tracking-wider lg:pr-6 lg:text-left">
                   {exp.duration.toUpperCase()}
                 </span>
               </div>

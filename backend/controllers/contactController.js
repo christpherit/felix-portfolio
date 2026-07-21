@@ -27,11 +27,16 @@ export const createContact = async (req, res) => {
 
     // Configure transporter
     const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || 'gmail',
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
 
     // Notification email (to you)
@@ -68,6 +73,8 @@ export const createContact = async (req, res) => {
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       try {
+        await transporter.verify();
+        console.log("SMTP connection successful");
         // Send notification to yourself
         await transporter.sendMail(notificationMail);
 

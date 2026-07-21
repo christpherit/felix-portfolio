@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
 import type { About, Skill, Experience, Project, Setting } from '../services/api';
 import christopher from '../assets/christopher.png';
+import felixResume from '../assets/Christopherresume.pdf';
 
 interface PortfolioContextType {
   about: About;
@@ -21,7 +22,7 @@ const fallbackAbout: About = {
   bio: "I'm a Full Stack Developer with nearly 3 years of experience building enterprise web applications using MERN, MEAN, GraphQL, Hasura, React, Angular, Node.js, MongoDB and MySQL. I specialize in designing high-performance REST and GraphQL APIs, optimizing relational and document-based databases, and engineering fluid, accessible client-side interfaces.",
   location: "Bangalore, India",
   profileImage: christopher, // Placeholder developer image
-  resumeUrl: "src/assets/Christopherresume.pdf",
+  resumeUrl: felixResume,
   stats: {
     experience: "Nearly 3 Years",
     projects: 14,

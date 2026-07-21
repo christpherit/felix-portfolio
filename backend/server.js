@@ -31,6 +31,8 @@ connectDB();
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // Security middle-tier
 app.use(helmet({
   crossOriginResourcePolicy: false // allow loading local images / third-party CDN images

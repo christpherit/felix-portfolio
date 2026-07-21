@@ -1,20 +1,31 @@
 import Contact from '../models/Contact.js';
 import nodemailer from 'nodemailer';
+import { contactAutoReplyTemplate } from '../templates/contactAutoReplyTemplate.js';
 
 // @desc    Submit contact message (and dispatch notification)
 // @route   POST /api/contacts
 // @access  Public
+
 export const createContact = async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !subject || !message) {
-    return res.status(400).json({ success: false, message: 'All inputs must be completed.' });
+    return res.status(400).json({
+      success: false,
+      message: 'All inputs must be completed.',
+    });
   }
 
   try {
-    const contact = await Contact.create({ name, email, subject, message });
+    // Save contact
+    const contact = await Contact.create({
+      name,
+      email,
+      subject,
+      message,
+    });
 
-    // Configure Nodemailer dynamic transporter
+    // Configure transporter
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL_SERVICE || 'gmail',
       auth: {
@@ -23,35 +34,115 @@ export const createContact = async (req, res) => {
       },
     });
 
-    const mailOptions = {
-      from: email,
-      to: process.env.NOTIFICATION_EMAIL || 'christopher.felix@example.com',
+    // Notification email (to you)
+    const notificationMail = {
+      from: `"Portfolio Contact Form" <${process.env.EMAIL_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL || 'felixittech@gmail.com',
       subject: `[Portfolio Inbox] ${subject}`,
-      text: `From: ${name} <${email}>\n\nInquiry details:\n${message}`,
+      html: `
+        <h2>📩 New Portfolio Contact</h2>
+
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+
+        <hr>
+
+        <p><strong>Message:</strong></p>
+
+        <p>${message}</p>
+      `,
     };
 
-    // Dispatch email if environment credentials are set
+    // Auto reply email (to sender)
+    const autoReplyMail = {
+      from: `"Christopher Felix" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Thank you for contacting Christopher Felix',
+      html: contactAutoReplyTemplate({
+        name,
+        subject,
+        message,
+      }),
+    };
+
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Nodemailer pipeline failure:', error);
-        } else {
-          console.log('Email dispatched successfully:', info.response);
-        }
-      });
+      try {
+        // Send notification to yourself
+        await transporter.sendMail(notificationMail);
+
+        // Send thank-you email to sender
+        await transporter.sendMail(autoReplyMail);
+
+        console.log('Notification and auto-reply emails sent successfully.');
+      } catch (mailError) {
+        console.error('Email sending failed:', mailError);
+      }
     } else {
-      console.log('--- [MOCK NOTIFICATION EMAIL DISPATCHED] ---');
-      console.log(`To: ${mailOptions.to}`);
-      console.log(`Subject: ${mailOptions.subject}`);
-      console.log(`Content:\n${mailOptions.text}`);
-      console.log('-------------------------------------------');
+      console.log('Email credentials are not configured.');
     }
 
-    res.status(201).json({ success: true, data: contact });
+    return res.status(201).json({
+      success: true,
+      message: 'Message sent successfully.',
+      data: contact,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
+
+// export const createContact = async (req, res) => {
+//   const { name, email, subject, message } = req.body;
+
+//   if (!name || !email || !subject || !message) {
+//     return res.status(400).json({ success: false, message: 'All inputs must be completed.' });
+//   }
+
+//   try {
+//     const contact = await Contact.create({ name, email, subject, message });
+
+//     // Configure Nodemailer dynamic transporter
+//     const transporter = nodemailer.createTransport({
+//       service: process.env.EMAIL_SERVICE || 'gmail',
+//       auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS,
+//       },
+//     });
+
+//     const mailOptions = {
+//       from: email,
+//       to: process.env.NOTIFICATION_EMAIL || 'felixittech@gmail.com',
+//       subject: `[Portfolio Inbox] ${subject}`,
+//       text: `From: ${name} <${email}>\n\nInquiry details:\n${message}`,
+//     };
+
+//     // Dispatch email if environment credentials are set
+//     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+//       transporter.sendMail(mailOptions, (error, info) => {
+//         if (error) {
+//           console.error('Nodemailer pipeline failure:', error);
+//         } else {
+//           console.log('Email dispatched successfully:', info.response);
+//         }
+//       });
+//     } else {
+//       console.log('--- [MOCK NOTIFICATION EMAIL DISPATCHED] ---');
+//       console.log(`To: ${mailOptions.to}`);
+//       console.log(`Subject: ${mailOptions.subject}`);
+//       console.log(`Content:\n${mailOptions.text}`);
+//       console.log('-------------------------------------------');
+//     }
+
+//     res.status(201).json({ success: true, data: contact });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 // @desc    Get all inbox messages
 // @route   GET /api/contacts

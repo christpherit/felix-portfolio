@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiLinkedin, FiGithub, FiTwitter } from 'react-icons/fi';
 import { usePortfolio } from '../context/PortfolioContext';
+import { ProfileImage } from '../components/ProfileImage';
 
 export const Hero: React.FC = () => {
   const { about, settings } = usePortfolio();
@@ -84,8 +85,8 @@ export const Hero: React.FC = () => {
           className="lg:col-span-5 relative hidden lg:block flex justify-center"
         >
           <div className="relative w-[340px] h-[420px] rounded-3xl overflow-hidden border-4 border-zinc-200 shadow-2xl">
-            <img 
-              src={about.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'} 
+            <ProfileImage 
+              src={about.profileImage} 
               alt="Developer Profile" 
               className="w-full h-full object-cover" 
             />

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiArrowRight } from 'react-icons/fi';
 import { usePortfolio } from '../context/PortfolioContext';
+import { ProfileImage } from '../components/ProfileImage';
 
 export const About: React.FC = () => {
   const { about } = usePortfolio();
@@ -39,11 +40,10 @@ export const About: React.FC = () => {
               
               {/* Profile Image container */}
               <div className="w-[260px] h-[260px] rounded-full overflow-hidden border-4 border-white shadow-2xl relative z-10">
-                <img
-                  src={about.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'}
+                <ProfileImage
+                  src={about.profileImage}
                   alt="Developer Profile"
                   className="w-full h-full object-cover filter brightness-95"
-                  loading="lazy"
                 />
               </div>
             </div>

@@ -1,10 +1,12 @@
 import type { About, Skill, Experience, Project, Setting } from '../services/api';
+import christopherImage from '../assets/christopher.png'; 
+import christopherResume from '../assets/Christopherresume.pdf';
 
 export const portfolioAbout: About = {
   bio: "I'm a Full Stack Developer with nearly 3 years of experience building enterprise web applications using MERN, MEAN, GraphQL, Hasura, React, Angular, Node.js, MongoDB and MySQL. I specialize in designing high-performance REST and GraphQL APIs, optimizing relational and document-based databases, and engineering fluid, accessible client-side interfaces.",
   location: "Bangalore, India",
-  profileImage: "/src/assets/christopher.png",
-  resumeUrl: "/src/assets/Christopherresume.pdf",
+  profileImage: christopherImage,
+  resumeUrl: christopherResume,
   stats: {
     experience: "Nearly 3 Years",
     projects: 14,

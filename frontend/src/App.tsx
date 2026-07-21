@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PortfolioProvider } from './context/PortfolioContext';
 
@@ -33,46 +33,60 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-violet-600/35 selection:text-white">
+      
+      {/* Global Visual Widgets - Hidden on Admin Console routes */}
+      {!isAdminRoute && (
+        <>
+          <CommandPalette />
+          <Navbar />
+        </>
+      )}
+
+      {/* Scrollable Main Area */}
+      <main className="flex-grow">
+        <Routes>
+          {/* Public landing layout */}
+          <Route path="/" element={<Home />} />
+          
+          {/* Public Case Study page */}
+          <Route path="/project/:id" element={<ProjectCaseStudy />} />
+          
+          {/* Admin login */}
+          <Route path="/admin" element={<AdminLogin />} />
+          
+          {/* Protected Admin Console Dashboard */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Redirect all unmatched routes back to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+
+      {/* Hide footer on admin routes */}
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+};
+
 export const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
         <PortfolioProvider>
-          <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-violet-600/35 selection:text-white">
-            
-            {/* Global Visual Widgets */}
-            <CommandPalette />
-            <Navbar />
-
-            {/* Scrollable Main Area */}
-            <main className="flex-grow">
-              <Routes>
-                {/* Public landing layout */}
-                <Route path="/" element={<Home />} />
-                
-                {/* Public Case Study page */}
-                <Route path="/project/:id" element={<ProjectCaseStudy />} />
-                
-                {/* Admin login */}
-                <Route path="/admin" element={<AdminLogin />} />
-                
-                {/* Protected Admin Console Dashboard */}
-                <Route 
-                  path="/admin/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-
-                {/* Redirect all unmatched routes back to home */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-
-            <Footer />
-          </div>
+          <AppContent />
         </PortfolioProvider>
       </AuthProvider>
     </Router>

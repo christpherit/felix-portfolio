@@ -19,12 +19,6 @@ export const createContact = async (req, res) => {
   }
 
   try {
-    console.log("========== CONTACT REQUEST ==========");
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Subject:", subject);
-
-    // Save contact
     const contact = await Contact.create({
       name,
       email,
@@ -32,110 +26,55 @@ export const createContact = async (req, res) => {
       message,
     });
 
-    console.log("✅ Contact saved to MongoDB");
-
-    console.log("========== EMAIL CONFIG ==========");
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS Exists:", !!process.env.EMAIL_PASS);
-    console.log(
-      "EMAIL_PASS Length:",
-      process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0
-    );
-    console.log(
-      "NOTIFICATION_EMAIL:",
-      process.env.NOTIFICATION_EMAIL
-    );
-
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      family: 4,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const notificationMail = {
-      from: `"Christopher Felix" <${process.env.EMAIL_USER}>`,
-      to: process.env.NOTIFICATION_EMAIL || process.env.EMAIL_USER,
-      subject: `📩 New Portfolio Contact - ${subject}`,
-      html: contactNotificationTemplate({
-        name,
-        email,
-        subject,
-        message,
-      }),
-    };
-
-    const autoReplyMail = {
-      from: `"Christopher Felix" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Thank you for contacting Christopher Felix",
-      html: contactAutoReplyTemplate({
-        name,
-        subject,
-        message,
-      }),
-    };
-
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        console.log("========== VERIFYING SMTP ==========");
-
-        await transporter.verify();
-
-        console.log("✅ SMTP VERIFIED");
-
-        console.log("========== SENDING NOTIFICATION ==========");
-
-        const notifyResult = await transporter.sendMail(notificationMail);
-
-        console.log("✅ Notification Sent");
-        console.log(notifyResult);
-
-        console.log("========== SENDING AUTO REPLY ==========");
-
-        const replyResult = await transporter.sendMail(autoReplyMail);
-
-        console.log("✅ Auto Reply Sent");
-        console.log(replyResult);
-
-        console.log("========== EMAIL PROCESS COMPLETE ==========");
-      } catch (mailError) {
-        console.log("========== EMAIL ERROR ==========");
-
-        console.error(mailError);
-
-        console.log("Code:", mailError.code);
-        console.log("Command:", mailError.command);
-        console.log("Response:", mailError.response);
-        console.log("Response Code:", mailError.responseCode);
-        console.log("Message:", mailError.message);
-        console.log("Stack:", mailError.stack);
-
-        console.log("==================================");
-      }
-    } else {
-      console.log("❌ EMAIL_USER or EMAIL_PASS Missing");
-    }
-
-    return res.status(201).json({
+    // Respond immediately
+    res.status(201).json({
       success: true,
       message: "Message sent successfully.",
       data: contact,
     });
-  } catch (error) {
-    console.error("API ERROR:", error);
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    // Send emails in background
+    (async () => {
+      try {
+        await resend.emails.send({
+          from: `Christopher Felix <${process.env.FROM_EMAIL}>`,
+          to: process.env.NOTIFICATION_EMAIL,
+          subject: `📩 New Portfolio Contact - ${subject}`,
+          html: contactNotificationTemplate({
+            name,
+            email,
+            subject,
+            message,
+          }),
+        });
+
+        await resend.emails.send({
+          from: `Christopher Felix <${process.env.FROM_EMAIL}>`,
+          to: email,
+          subject: "Thank you for contacting Christopher Felix",
+          html: contactAutoReplyTemplate({
+            name,
+            subject,
+            message,
+          }),
+        });
+
+        console.log("✅ Emails sent successfully");
+      } catch (err) {
+        console.error("❌ Resend Error:", err);
+      }
+    })();
+  } catch (error) {
+    console.error(error);
+
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 };
-
 // export const createContact = async (req, res) => {
 //   const { name, email, subject, message } = req.body;
 

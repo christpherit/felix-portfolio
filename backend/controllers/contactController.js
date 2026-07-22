@@ -1,9 +1,9 @@
 import Contact from '../models/Contact.js';
-import nodemailer from 'nodemailer';
 import { contactAutoReplyTemplate } from '../templates/contactAutoReplyTemplate.js';
 import { contactNotificationTemplate } from '../templates/contactNotificationMailTemplate.js';
+import { Resend } from "resend";
 
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 // @desc    Submit contact message (and dispatch notification)
 // @route   POST /api/contacts
 // @access  Public
